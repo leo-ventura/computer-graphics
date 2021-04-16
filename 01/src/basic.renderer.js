@@ -17,16 +17,58 @@ const createShapeFromPrimitive = (primitive) => {
         case "polygon":
             shape = Polygon;
             break;
+        default:
+            console.error(`Can't instantiate shape ${primitive.shape}`);
+            return;
     }
     return new shape(primitive);
 }
 
-// triangle.js
-class Triangle {
+const calculateNormal = (p0, p1) => {
+    return nj.array([-(p1[1] - p0[1]), p1[0] - p0[0]]);
+};
+
+const L_i = (q, p0, p1) => {
+    const n = calculateNormal(p0, p1);
+    return (q - p0).dot(n.T);
+};
+class Shape {
     constructor({vertices, color}) {
         this.boundingBox = this.createBoundingBox(vertices);
         this.vertices = vertices;
         this.color = color;
+    }
+
+    isInsideBoundingBox(x,y) {
+        const {min_x, max_x, min_y, max_y} = this.boundingBox;
+        return between(min_x, x, max_x) && between(min_y, y, max_y);
+    }
+
+    isInsideShape(x, y) {
+        const q = nj.array();
+        const circularVertices = [...this.vertices, this.vertices[0]];
+        let Ls = [];
+        for (let i; i < circularVertices.length; i++) {
+            const p0 = nj.array(circularVertices[i]);
+            const p1 = nj.array(circularVertices[i+1]);
+            const L = L_i(q, p0, p1);
+            if (i != 0 && Ls[i-1] * L < 0) {
+                return false;
+            }
+            Ls.push(L);
+        }
+        return true;
+    }
+
+    isInside(x, y) {
+        return this.isInsideBoundingBox(x,y) && this.isInsideShape(x,y);
+    }
+};
+
+// triangle.js
+class Triangle extends Shape {
+    constructor(primitive) {
+        super(primitive);
     }
 
     createBoundingBox(vertices) {
@@ -46,15 +88,6 @@ class Triangle {
             min_y,
             max_y
         };
-    }
-
-    isInsideBoundingBox(x,y) {
-        const {min_x, max_x, min_y, max_y} = this.boundingBox;
-        return between(min_x, x, max_x) && between(min_y, y, max_y);
-    }
-
-    isInside(x, y) {
-        return this.isInsideBoundingBox(x, y);
     }
 }
 
