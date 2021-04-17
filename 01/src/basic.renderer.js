@@ -60,10 +60,6 @@ class Shape {
 
 // triangle.js
 class Triangle extends Shape {
-    constructor(primitive) {
-        super(primitive);
-    }
-
     createBoundingBox(vertices) {
         let min_x = Number.MAX_VALUE;
         let min_y = Number.MAX_VALUE;
@@ -82,15 +78,34 @@ class Triangle extends Shape {
             max_y
         };
     }
-}
+};
 
 // circle.js
 class Circle {};
 
 // polygon.js
-class Polygon {};
+class Polygon extends Shape {
+    createBoundingBox(vertices) {
+        let min_x = Number.MAX_VALUE;
+        let min_y = Number.MAX_VALUE;
+        let max_x = Number.MIN_VALUE;
+        let max_y = Number.MIN_VALUE;
+        for (let [x,y] of vertices) {
+            min_x = x < min_x ? x : min_x;
+            max_x = x > max_x ? x : max_x;
+            min_y = y < min_y ? y : min_y;
+            max_y = y > max_y ? y : max_y;
+        }
+        return {
+            min_x,
+            max_x,
+            min_y,
+            max_y
+        };
+    }
+};
 
-// --------------------------------- Basic Renderer functionalities ----------- //
+// ---------------- Basic Renderer functionalities ----------- //
 function inside(x, y, primitive) {
     return primitive.isInside(x,y);
 }
