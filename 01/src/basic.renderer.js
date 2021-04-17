@@ -25,12 +25,12 @@ const createShapeFromPrimitive = (primitive) => {
 }
 
 const calculateNormal = (p0, p1) => {
-    return nj.array([-(p1[1] - p0[1]), p1[0] - p0[0]]);
+    return nj.array([-(p1.get(1) - p0.get(1)), p1.get(0) - p0.get(0)]);
 };
 
 const L_i = (q, p0, p1) => {
     const n = calculateNormal(p0, p1);
-    return (q - p0).dot(n.T);
+    return nj.dot(nj.subtract(q, p0), n);
 };
 class Shape {
     constructor({vertices, color}) {
@@ -39,29 +39,22 @@ class Shape {
         this.color = color;
     }
 
-    isInsideBoundingBox(x,y) {
-        const {min_x, max_x, min_y, max_y} = this.boundingBox;
-        return between(min_x, x, max_x) && between(min_y, y, max_y);
-    }
-
-    isInsideShape(x, y) {
-        const q = nj.array();
+    isInside(x, y) {
+        const q = nj.array([x,y]);
+        // Assumes vertices are somehow ordered
         const circularVertices = [...this.vertices, this.vertices[0]];
         let Ls = [];
-        for (let i; i < circularVertices.length; i++) {
+        for (let i = 0; i < this.vertices.length; i++) {
             const p0 = nj.array(circularVertices[i]);
             const p1 = nj.array(circularVertices[i+1]);
-            const L = L_i(q, p0, p1);
+            // result is a scalar, get the first element of array
+            const L = L_i(q, p0, p1).get(0);
             if (i != 0 && Ls[i-1] * L < 0) {
                 return false;
             }
             Ls.push(L);
         }
         return true;
-    }
-
-    isInside(x, y) {
-        return this.isInsideBoundingBox(x,y) && this.isInsideShape(x,y);
     }
 };
 
@@ -91,10 +84,6 @@ class Triangle extends Shape {
     }
 }
 
-const between = (left, x, right) => {
-    return left <= x && x <= right;
-}
-
 // circle.js
 class Circle {};
 
@@ -110,7 +99,7 @@ function Screen( width, height, scene ) {
     this.width = width;
     this.height = height;
     this.scene = this.preprocess(scene);
-    this.createImage(); 
+    this.createImage();
 }
 
 Object.assign( Screen.prototype, {
@@ -127,7 +116,6 @@ Object.assign( Screen.prototype, {
                 preprop_scene.push(primitiveShape);
             }
 
-            
             return preprop_scene;
         },
 
@@ -139,16 +127,16 @@ Object.assign( Screen.prototype, {
             var color;
 
             // In this loop, the image attribute must be updated after the rasterization procedure.
-            for( var primitive of this.scene ) {
-
+            for( let primitive of this.scene ) {
                 // Loop through all pixels
                 // Use bounding boxes in order to speed up this loop
-                for (var i = 0; i < this.width; i++) {
+                const {min_x, max_x, min_y, max_y} = primitive.boundingBox;
+                for (var i = Math.floor(min_x); i < Math.floor(max_x); i++) {
                     var x = i + 0.5;
-                    for( var j = 0; j < this.height; j++) {
+                    for( var j = Math.floor(min_y); j < Math.floor(max_y); j++) {
                         var y = j + 0.5;
 
-                        // First, we check if the pixel center is inside the primitive 
+                        // First, we check if the pixel center is inside the primitive
                         if ( inside( x, y, primitive ) ) {
                             // only solid colors for now
                             color = nj.array(primitive.color);
@@ -158,9 +146,6 @@ Object.assign( Screen.prototype, {
                     }
                 }
             }
-            
-            
-            
         },
 
         set_pixel: function( i, j, colorarr ) {
@@ -177,12 +162,12 @@ Object.assign( Screen.prototype, {
             $image.width = this.width; $image.height = this.height;
 
             // Saving the image
-            // nj.images.save( this.image, $image );
+            nj.images.save( this.image, $image );
         }
     }
 );
 
     exports.Screen = Screen;
-    
+
 })));
 
