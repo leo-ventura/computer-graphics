@@ -9,7 +9,9 @@ const createShapeFromPrimitive = (primitive) => {
     let shape;
     switch(primitive.shape.toLowerCase()) {
         case "circle":
-            shape = Circle;
+            shape = Polygon;
+            primitive.shape = "polygon"
+            primitive.vertices = getCircleVertices(primitive.center, primitive.radius);
             break;
         case "triangle":
             shape = Triangle;
@@ -24,6 +26,7 @@ const createShapeFromPrimitive = (primitive) => {
     return new shape(primitive);
 }
 
+
 const calculateNormal = (p0, p1) => {
     return nj.array([-(p1.get(1) - p0.get(1)), p1.get(0) - p0.get(0)]);
 };
@@ -32,11 +35,14 @@ const L_i = (q, p0, p1) => {
     const n = calculateNormal(p0, p1);
     return nj.dot(nj.subtract(q, p0), n);
 };
+
 class Shape {
-    constructor({vertices, color}) {
+    constructor({vertices, color, radius, center}) {
         this.boundingBox = this.createBoundingBox(vertices);
         this.vertices = vertices;
         this.color = color;
+        this.radius = radius;
+        this.center = center;
     }
 
     isInside(x, y) {
@@ -57,6 +63,21 @@ class Shape {
         return true;
     }
 };
+
+const getCircleVertices = (center, radius) => {
+    let points = 20;
+    let verticesNumber = points + 2;
+    const x = center[0];
+    const y = center[1]
+    const vertices = [];
+    let doublePi = 2 * Math.PI;
+    for(var i=0; i<verticesNumber; i++) {
+        var xPoint = x + (radius * Math.cos((i  * doublePi) / verticesNumber));
+        var yPoint = y + (radius * Math.sin((i  * doublePi) / verticesNumber));
+        vertices.push([xPoint, yPoint])
+    }
+    return vertices;
+}
 
 // triangle.js
 class Triangle extends Shape {
@@ -81,7 +102,25 @@ class Triangle extends Shape {
 };
 
 // circle.js
-class Circle {};
+class Circle extends Shape {
+    createBoundingBox(vertices) {
+        let min_x = Number.MAX_VALUE;
+        let min_y = Number.MAX_VALUE;
+        let max_x = Number.MIN_VALUE;
+        let max_y = Number.MIN_VALUE;
+        for (let [x,y] of vertices) {
+            min_x = x < min_x ? x : min_x;
+            max_x = x > max_x ? x : max_x;
+            min_y = y < min_y ? y : min_y;
+            max_y = y > max_y ? y : max_y;
+        }
+        return {
+            min_x,
+            max_x,
+            min_y,
+            max_y
+        };
+    }};
 
 // polygon.js
 class Polygon extends Shape {
