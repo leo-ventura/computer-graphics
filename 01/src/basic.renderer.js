@@ -106,6 +106,17 @@ class Polygon extends Shape {
 };
 
 // ---------------- Basic Renderer functionalities ----------- //
+const applyXForm = ({vertices, xform}) => {
+    let transformedVertices = [];
+    xform = nj.array(xform);
+    for (let vertice of vertices) {
+        vertice = nj.array([...vertice, 1]);
+        const tVertice = nj.dot(xform, vertice);
+        transformedVertices.push([tVertice.get(0), tVertice.get(1)]);
+    }
+    return transformedVertices;
+};
+
 function inside(x, y, primitive) {
     return primitive.isInside(x,y);
 }
@@ -127,6 +138,10 @@ Object.assign( Screen.prototype, {
             for( let primitive of scene ) {
                 // do some processing
                 // for now, only copies each primitive to a new list
+                if (primitive.hasOwnProperty('xform')) {
+                    primitive.vertices = applyXForm(primitive);
+                }
+
                 let primitiveShape = createShapeFromPrimitive(primitive);
                 preprop_scene.push(primitiveShape);
             }
