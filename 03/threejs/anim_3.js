@@ -51,13 +51,13 @@ Object.assign(AirSquat.prototype, {
     let lowerLeftLegTween = new TWEEN.Tween({ theta: 0 })
       .to({ theta: Math.PI / 4 }, 500)
       .onUpdate(function () {
-        let left_lower_arm = robot
+        let left_lower_leg = robot
           .getObjectByName("left_upper_leg")
           .getObjectByName("lower_leg");
 
         const pivot = { x: 0, y: 1.5, z: 0 };
-        const { x, y, z } = left_lower_arm.position;
-        left_lower_arm.matrix
+        const { x, y, z } = left_lower_leg.position;
+        left_lower_leg.matrix
           .makeTranslation(0, 0, 0)
           .premultiply(
             new THREE.Matrix4().makeTranslation(-pivot.x, -pivot.y, -pivot.z)
@@ -68,7 +68,7 @@ Object.assign(AirSquat.prototype, {
           )
           .premultiply(new THREE.Matrix4().makeTranslation(x, y, z));
 
-        left_lower_arm.updateMatrixWorld(true);
+        left_lower_leg.updateMatrixWorld(true);
         stats.update();
         renderer.render(scene, camera);
       })
@@ -102,13 +102,13 @@ Object.assign(AirSquat.prototype, {
     let lowerRightLegTween = new TWEEN.Tween({ theta: 0 })
       .to({ theta: Math.PI / 4 }, 500)
       .onUpdate(function () {
-        let right_lower_arm = robot
+        let right_lower_leg = robot
           .getObjectByName("right_upper_leg")
           .getObjectByName("lower_leg");
 
         const pivot = { x: 0, y: 1.5, z: 0 };
-        const { x, y, z } = right_lower_arm.position;
-        right_lower_arm.matrix
+        const { x, y, z } = right_lower_leg.position;
+        right_lower_leg.matrix
           .makeTranslation(0, 0, 0)
           .premultiply(
             new THREE.Matrix4().makeTranslation(-pivot.x, -pivot.y, -pivot.z)
@@ -119,7 +119,7 @@ Object.assign(AirSquat.prototype, {
           )
           .premultiply(new THREE.Matrix4().makeTranslation(x, y, z));
 
-        right_lower_arm.updateMatrixWorld(true);
+        right_lower_leg.updateMatrixWorld(true);
         stats.update();
         renderer.render(scene, camera);
       })
