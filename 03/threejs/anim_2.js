@@ -2,7 +2,7 @@ function YMCA(key) {this.key = key;}
 
 Object.assign( YMCA.prototype, {
     init: async function() {
-        const MOVEMENT_DELAY = 1500;
+        const MOVEMENT_DELAY = 1000;
 
         const armMovement = (initial_theta, final_theta, arm, pivot={x:0, y:2, z:0}) => {
             return new TWEEN.Tween( {theta:initial_theta} )
@@ -34,12 +34,11 @@ Object.assign( YMCA.prototype, {
             tween.leftArm.chain(tween.leftArmReturn, tween.leftLowerArmReturn);
         };
 
-        const symmetricArmMovement = (angle) => {
-            console.log(angle);
-            const rightArm = armMovement(0, angle, right_arm);
-            const leftArm = armMovement(0, -angle, left_arm);
-            const rightArmReturn = armMovement(angle, 0, right_arm);
-            const leftArmReturn = armMovement(-angle, 0, left_arm);
+        const asymmetricArmMovement = (right_angle, left_angle, right_arm, left_arm) => {
+            const rightArm = armMovement(0, right_angle, right_arm);
+            const leftArm = armMovement(0, left_angle, left_arm);
+            const rightArmReturn = armMovement(right_angle, 0, right_arm);
+            const leftArmReturn = armMovement(left_angle, 0, left_arm);
             return {
                 rightArm,
                 leftArm,
@@ -48,8 +47,15 @@ Object.assign( YMCA.prototype, {
             };
         };
 
-        const symmetricLowerArmMovement = (angle) => {
-            const lower = symmetricArmMovement(angle);
+        const symmetricArmMovement = (angle, right_arm, left_arm) => {
+            const arm = asymmetricArmMovement(angle, -angle, right_arm, left_arm);
+            return {
+                ...arm
+            };
+        };
+
+        const symmetricLowerArmMovement = (angle, right_arm, left_arm) => {
+            const lower = symmetricArmMovement(angle, right_arm, left_arm);
             return {
                 rightLowerArm: lower.rightArm,
                 leftLowerArm: lower.leftArm,
@@ -60,101 +66,53 @@ Object.assign( YMCA.prototype, {
 
         const yMovement = () => {
             const angle = Math.PI*3/4;
-            const rightArm = armMovement(0, angle, right_arm);
-            const leftArm = armMovement(0, -angle, left_arm);
-            const rightArmReturn = armMovement(angle, 0, right_arm);
-            const leftArmReturn = armMovement(-angle, 0, left_arm);
+            const arm = symmetricArmMovement(angle, right_arm, left_arm);
+            const lowerArm = symmetricLowerArmMovement(0, right_lower_arm, left_lower_arm);
 
-            const lower_angle = 0;
-            const rightLowerArm = armMovement(0, lower_angle, right_lower_arm);
-            const leftLowerArm = armMovement(0, -lower_angle, left_lower_arm);
-            const rightLowerArmReturn = armMovement(lower_angle, 0, right_lower_arm);
-            const leftLowerArmReturn = armMovement(-lower_angle, 0, left_lower_arm);
             return {
-                rightArm,
-                rightArmReturn,
-                leftArm,
-                leftArmReturn,
-                rightLowerArm,
-                rightLowerArmReturn,
-                leftLowerArm,
-                leftLowerArmReturn,
+                ...arm,
+                ...lowerArm,
             };
         };
 
         const mMovement = () => {
             const upper_angle = Math.PI*3/4;
-            const rightArm = armMovement(0, upper_angle, right_arm);
-            const leftArm = armMovement(0, -upper_angle, left_arm);
-            const rightArmReturn = armMovement(upper_angle, 0, right_arm);
-            const leftArmReturn = armMovement(-upper_angle, 0, left_arm);
+            const arm = symmetricArmMovement(upper_angle, right_arm, left_arm);
 
             const lower_angle = -Math.PI/2;
-            const rightLowerArm = armMovement(0, lower_angle, right_lower_arm);
-            const leftLowerArm = armMovement(0, -lower_angle, left_lower_arm);
-            const rightLowerArmReturn = armMovement(lower_angle, 0, right_lower_arm);
-            const leftLowerArmReturn = armMovement(-lower_angle, 0, left_lower_arm);
+            const lowerArm = symmetricLowerArmMovement(lower_angle, right_lower_arm, left_lower_arm);
 
             return {
-                rightArm,
-                rightArmReturn,
-                leftArm,
-                leftArmReturn,
-                rightLowerArm,
-                rightLowerArmReturn,
-                leftLowerArm,
-                leftLowerArmReturn,
+                ...arm,
+                ...lowerArm,
             };
         }
 
         const cMovement = () => {
             const left_upper_angle = Math.PI/4;
             const right_upper_angle = Math.PI/2
-            const rightArm = armMovement(0, right_upper_angle, right_arm);
-            const leftArm = armMovement(0, left_upper_angle, left_arm);
-            const rightArmReturn = armMovement(right_upper_angle, 0, right_arm);
-            const leftArmReturn = armMovement(left_upper_angle, 0, left_arm);
+            const arm = asymmetricArmMovement(right_upper_angle, left_upper_angle,
+                right_arm, left_arm);
 
-            const lower_angle = Math.PI/8;
-            const rightLowerArm = armMovement(0, -lower_angle, right_lower_arm);
-            const leftLowerArm = armMovement(0, lower_angle, left_lower_arm);
-            const rightLowerArmReturn = armMovement(lower_angle, 0, right_lower_arm);
-            const leftLowerArmReturn = armMovement(lower_angle, 0, left_lower_arm);
+            const lower_angle = -Math.PI/8;
+            const lowerArm = symmetricLowerArmMovement(lower_angle, right_lower_arm, left_lower_arm);
 
             return {
-                rightArm,
-                rightArmReturn,
-                leftArm,
-                leftArmReturn,
-                rightLowerArm,
-                rightLowerArmReturn,
-                leftLowerArm,
-                leftLowerArmReturn,
+                ...arm,
+                ...lowerArm,
             };
         }
 
         const aMovement = () => {
             const upper_angle = Math.PI*3/4;
-            const rightArm = armMovement(0, upper_angle, right_arm);
-            const leftArm = armMovement(0, -upper_angle, left_arm);
-            const rightArmReturn = armMovement(upper_angle, 0, right_arm);
-            const leftArmReturn = armMovement(-upper_angle, 0, left_arm);
+            const arm = symmetricArmMovement(upper_angle, right_arm, left_arm);
 
             const lower_angle = Math.PI/2;
-            const rightLowerArm = armMovement(0, lower_angle, right_lower_arm);
-            const leftLowerArm = armMovement(0, -lower_angle, left_lower_arm);
-            const rightLowerArmReturn = armMovement(lower_angle, 0, right_lower_arm);
-            const leftLowerArmReturn = armMovement(-lower_angle, 0, left_lower_arm);
+            const lowerArm = symmetricLowerArmMovement(lower_angle, right_lower_arm, left_lower_arm);
 
             return {
-                rightArm,
-                rightArmReturn,
-                leftArm,
-                leftArmReturn,
-                rightLowerArm,
-                rightLowerArmReturn,
-                leftLowerArm,
-                leftLowerArmReturn,
+                ...arm,
+                ...lowerArm,
             };
         }
 
@@ -165,7 +123,6 @@ Object.assign( YMCA.prototype, {
 
         switch(this.key) {
             case 'y':
-                console.log(yMovement());
                 executeMovement(yMovement());
                 break;
             case 'm':
