@@ -97,18 +97,21 @@ function onWindowResize() {
 function onDocumentKeyDown(event) {
     // One for Hand wave, Two for your Custom Animation #2 and Three - Your Custom Animation #3
     // For now, only works for Handwave
-    
-    console.log(event.key);
-    key = parseInt(event.key);
+    key = event.key
+    console.log(key);
 
     animations = {
         1 : WaveAnimation,
-        2 : false,
+        2 : YMCA,
         3 : AirSquat,
+        y: YMCA,
+        m: YMCA,
+        c: YMCA,
+        a: YMCA
     };
 
     // Run selected animation
-    animation = new animations[key]();
+    animation = new animations[key](key);
     animation.run()
 }
 

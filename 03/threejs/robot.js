@@ -27,6 +27,7 @@ function gen_robot() {
     left_hand.position.y = -1.5;
     left_lower_arm.position.y = -3;
     left_upper_arm.position.x = -2.6;
+    left_upper_arm.position.z = 0.05;
 
     // right: upper arm, arm, hand
     var right_upper_arm = left_upper_arm.clone();
