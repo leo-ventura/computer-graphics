@@ -2,6 +2,28 @@ function AirSquat() {}
 
 Object.assign(AirSquat.prototype, {
   init: function () {
+    let torsoTween = new TWEEN.Tween({ x: 0, y: 0, z: 0 })
+      .to({ x: 0, y: -2, z: 0 }, 500)
+      .onUpdate(function () {
+        let torso = robot.getObjectByName("torso");
+
+        torso.matrix
+          .makeTranslation(0, 0, 0)
+          .multiply(
+            new THREE.Matrix4().makeTranslation(
+              this._object.x,
+              this._object.y,
+              this._object.z
+            )
+          );
+
+        torso.updateMatrixWorld(true);
+        stats.update();
+        renderer.render(scene, camera);
+      })
+      .repeat(5)
+      .yoyo(true);
+
     let upperLeftLegTween = new TWEEN.Tween({ theta: 0 })
       .to({ theta: Math.PI / 4 }, 500)
       .onUpdate(function () {
@@ -22,7 +44,9 @@ Object.assign(AirSquat.prototype, {
         left_upper_leg.updateMatrixWorld(true);
         stats.update();
         renderer.render(scene, camera);
-      }).repeat(5).yoyo(true);
+      })
+      .repeat(5)
+      .yoyo(true);
 
     let lowerLeftLegTween = new TWEEN.Tween({ theta: 0 })
       .to({ theta: Math.PI / 4 }, 500)
@@ -47,7 +71,9 @@ Object.assign(AirSquat.prototype, {
         left_lower_arm.updateMatrixWorld(true);
         stats.update();
         renderer.render(scene, camera);
-      }).repeat(5).yoyo(true);
+      })
+      .repeat(5)
+      .yoyo(true);
 
     let upperRightLegTween = new TWEEN.Tween({ theta: 0 })
       .to({ theta: Math.PI / 4 }, 500)
@@ -69,7 +95,9 @@ Object.assign(AirSquat.prototype, {
         right_upper_leg.updateMatrixWorld(true);
         stats.update();
         renderer.render(scene, camera);
-      }).repeat(5).yoyo(true);
+      })
+      .repeat(5)
+      .yoyo(true);
 
     let lowerRightLegTween = new TWEEN.Tween({ theta: 0 })
       .to({ theta: Math.PI / 4 }, 500)
@@ -94,10 +122,12 @@ Object.assign(AirSquat.prototype, {
         right_lower_arm.updateMatrixWorld(true);
         stats.update();
         renderer.render(scene, camera);
-      }).repeat(5).yoyo(true);
+      })
+      .repeat(5)
+      .yoyo(true);
 
     let upperRightArmTween = new TWEEN.Tween({ theta: 0 })
-      .to({ theta: Math.PI/2 }, 500)
+      .to({ theta: Math.PI / 2 }, 500)
       .onUpdate(function () {
         let right_upper_arm = robot.getObjectByName("right_upper_arm");
         const pivot = { x: 0, y: 2, z: 0 };
@@ -116,10 +146,12 @@ Object.assign(AirSquat.prototype, {
         right_upper_arm.updateMatrixWorld(true);
         stats.update();
         renderer.render(scene, camera);
-      }).repeat(5).yoyo(true);
-    
-      let upperLeftArmTween = new TWEEN.Tween({ theta: 0 })
-      .to({ theta: Math.PI/2 }, 500)
+      })
+      .repeat(5)
+      .yoyo(true);
+
+    let upperLeftArmTween = new TWEEN.Tween({ theta: 0 })
+      .to({ theta: Math.PI / 2 }, 500)
       .onUpdate(function () {
         let left_upper_arm = robot.getObjectByName("left_upper_arm");
         const pivot = { x: 0, y: 2, z: 0 };
@@ -138,7 +170,9 @@ Object.assign(AirSquat.prototype, {
         left_upper_arm.updateMatrixWorld(true);
         stats.update();
         renderer.render(scene, camera);
-      }).repeat(5).yoyo(true);
+      })
+      .repeat(5)
+      .yoyo(true);
 
     upperLeftLegTween.start();
     lowerLeftLegTween.start();
@@ -146,6 +180,7 @@ Object.assign(AirSquat.prototype, {
     lowerRightLegTween.start();
     upperLeftArmTween.start();
     upperRightArmTween.start();
+    torsoTween.start();
   },
   animate: function (time) {
     window.requestAnimationFrame(this.animate.bind(this));
