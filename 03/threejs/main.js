@@ -104,11 +104,11 @@ function onDocumentKeyDown(event) {
     animations = {
         1 : WaveAnimation,
         2 : false,
-        3 : false,
+        3 : AirSquat,
     };
 
     // Run selected animation
-    animation = new animations[1]();
+    animation = new animations[key]();
     animation.run()
 }
 
