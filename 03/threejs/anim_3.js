@@ -5,8 +5,6 @@ Object.assign(AirSquat.prototype, {
     let upperLeftLegTween = new TWEEN.Tween({ theta: 0 })
       .to({ theta: Math.PI / 4 }, 500)
       .onUpdate(function () {
-        // This is an example of rotation of the right_upper_arm
-        // Notice that the transform is M = T * R
         let left_upper_leg = robot.getObjectByName("left_upper_leg");
         const pivot = { x: 0, y: -2, z: 0 };
         const { x, y, z } = left_upper_leg.position;
@@ -21,9 +19,7 @@ Object.assign(AirSquat.prototype, {
           )
           .premultiply(new THREE.Matrix4().makeTranslation(x, y, z));
 
-        // Updating final world matrix (with parent transforms) - mandatory
         left_upper_leg.updateMatrixWorld(true);
-        // Updating screen
         stats.update();
         renderer.render(scene, camera);
       }).repeat(5).yoyo(true);
@@ -56,8 +52,6 @@ Object.assign(AirSquat.prototype, {
     let upperRightLegTween = new TWEEN.Tween({ theta: 0 })
       .to({ theta: Math.PI / 4 }, 500)
       .onUpdate(function () {
-        // This is an example of rotation of the right_upper_leg
-        // Notice that the transform is M = T * R
         let right_upper_leg = robot.getObjectByName("right_upper_leg");
         const pivot = { x: 0, y: -2, z: 0 };
         const { x, y, z } = right_upper_leg.position;
@@ -72,9 +66,7 @@ Object.assign(AirSquat.prototype, {
           )
           .premultiply(new THREE.Matrix4().makeTranslation(x, y, z));
 
-        // Updating final world matrix (with parent transforms) - mandatory
         right_upper_leg.updateMatrixWorld(true);
-        // Updating screen
         stats.update();
         renderer.render(scene, camera);
       }).repeat(5).yoyo(true);
@@ -107,8 +99,6 @@ Object.assign(AirSquat.prototype, {
     let upperRightArmTween = new TWEEN.Tween({ theta: 0 })
       .to({ theta: Math.PI/2 }, 500)
       .onUpdate(function () {
-        // This is an example of rotation of the right_upper_arm
-        // Notice that the transform is M = T * R
         let right_upper_arm = robot.getObjectByName("right_upper_arm");
         const pivot = { x: 0, y: 2, z: 0 };
         const { x, y, z } = right_upper_arm.position;
@@ -123,9 +113,7 @@ Object.assign(AirSquat.prototype, {
           )
           .premultiply(new THREE.Matrix4().makeTranslation(x, y, z));
 
-        // Updating final world matrix (with parent transforms) - mandatory
         right_upper_arm.updateMatrixWorld(true);
-        // Updating screen
         stats.update();
         renderer.render(scene, camera);
       }).repeat(5).yoyo(true);
@@ -133,8 +121,6 @@ Object.assign(AirSquat.prototype, {
       let upperLeftArmTween = new TWEEN.Tween({ theta: 0 })
       .to({ theta: Math.PI/2 }, 500)
       .onUpdate(function () {
-        // This is an example of rotation of the left_upper_arm
-        // Notice that the transform is M = T * R
         let left_upper_arm = robot.getObjectByName("left_upper_arm");
         const pivot = { x: 0, y: 2, z: 0 };
         const { x, y, z } = left_upper_arm.position;
@@ -149,9 +135,7 @@ Object.assign(AirSquat.prototype, {
           )
           .premultiply(new THREE.Matrix4().makeTranslation(x, y, z));
 
-        // Updating final world matrix (with parent transforms) - mandatory
         left_upper_arm.updateMatrixWorld(true);
-        // Updating screen
         stats.update();
         renderer.render(scene, camera);
       }).repeat(5).yoyo(true);
@@ -162,8 +146,6 @@ Object.assign(AirSquat.prototype, {
     lowerRightLegTween.start();
     upperLeftArmTween.start();
     upperRightArmTween.start();
-    // lowerLegTween.chain(handTween);
-    // handTween.chain(lowerLegTweenReturn, upperLegTweenReturn);
   },
   animate: function (time) {
     window.requestAnimationFrame(this.animate.bind(this));
