@@ -109,6 +109,51 @@
                 return filtered_img;
             };
 
+            const extendImg = () => {
+                // Add extended border
+                // Add four borders:
+                // Top, bottom, left and right
+                // First top and bottom, then left and right
+                let topArray = [];
+                for (let i = 0; i < this.width; i++) {
+                    topArray.push(this.img.get(i, 0));
+                }
+                topArray = nj.array(topArray);
+
+                let bottomArray = [];
+                for (let i = 0; i < this.width; i++) {
+                    bottomArray.push(this.img.get(i, this.height-1));
+                }
+                bottomArray = nj.array(bottomArray);
+
+                let leftArray = [this.img.get(0,0)];
+                for (let j = 0; j < this.height; j++) {
+                    leftArray.push(this.img.get(0, j));
+                }
+                leftArray.push(0, this.height-1);
+                leftArray = nj.array(leftArray);
+
+                let rightArray = [this.img.get(this.width-1,0)];
+                for (let j = 0; j < this.height; j++) {
+                    rightArray.push(this.img.get(this.width-1, j));
+                }
+                rightArray.push(this.img.get(this.width-1, this.height-1));
+                rightArray = nj.array(rightArray);
+
+                let extendedImg = nj.concatenate(topArray, this.img);
+                extendedImg = nj.concatenate(extendImg, bottomArray);
+                extendedImg = nj.concatenate(leftArray.reshape(this.width+2, 1), extendedImg);
+                extendedImg = nj.concatenate(rightArray.reshape(this.width+2, 1), extendedImg);
+
+                this.width += 2;
+                this.height += 2;
+                this.img = extendedImg;
+            };
+
+            if (border === 'extend') {
+                extendImg();
+            }
+
             const kernels = {
                 "box": box,
                 "sobel": sobel,
@@ -121,6 +166,33 @@
         apply_xform: function()  {
             // Method to apply affine transform through inverse mapping (incomplete)
             // You may create auxiliary functions/methods if you'd like
+            // [ref]:
+            //  https://github.com/leo-ventura/computer-graphics/blob/0ae22f8f9325e03ca630dfbe01d8577d3211f363/01/src/basic.renderer.js#L51
+            const applyXForm = (x, y, xform) => {
+                xform = nj.array(xform);
+                const vertice = nj.array([x, y, 1]);
+                const tVertice = nj.dot(xform, vertice);
+                return [tVertice.get(0), tVertice.get(1)];
+            };
+
+            const matrixInverse = (xform) => {
+                // TODO finish matrix inverse implementation
+                return xform;
+            };
+
+            const inversedXForm = matrixInverse(this.xform);
+
+            let transformedImg = nj.images.read(new Image(this.width, this.height));
+            for (let i = 0; i < this.width; i++) {
+                for (let j = 0; j < this.height; j++) {
+                    const [u, v] = applyXForm(i, j, inversedXForm);
+
+                    // Should we use Math.round or change it to better resampling technique?
+                    const pixel = this.img.get(Math.round(u), Math.round(v));
+                    transformedImg.set(u, v, pixel);
+                }
+            }
+            this.img = transformedImg;
         },
 
         update: function() {
