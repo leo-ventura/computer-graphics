@@ -54,23 +54,17 @@
                         const totalSx = this.img.get(i-1, j-1) * -1
                                       + this.img.get(i  , j-1) * -2
                                       + this.img.get(i+1, j-1) * -1
-                                      // + this.img.get(i-1, j  ) * 0
-                                      // + this.img.get(i  , j  ) * 0
-                                      // + this.img.get(i+1, j  ) * 0
-                                      + this.img.get(i-1, j+1) * 1
-                                      + this.img.get(i  , j+1) * 2
-                                      + this.img.get(i+1, j+1) * 1
+                                      + this.img.get(i-1, j+1) *  1
+                                      + this.img.get(i  , j+1) *  2
+                                      + this.img.get(i+1, j+1) *  1
 
                         const X_ = Math.pow(totalSx/8, 2);
 
-                        const totalSy = this.img.get(i-1, j-1) * 1
-                                    //   + this.img.get(i  , j-1) * 0
+                        const totalSy = this.img.get(i-1, j-1) *  1
                                       + this.img.get(i+1, j-1) * -1
-                                      + this.img.get(i-1, j  ) * 2
-                                    //   + this.img.get(i  , j  ) * 0
+                                      + this.img.get(i-1, j  ) *  2
                                       + this.img.get(i+1, j  ) * -2
-                                      + this.img.get(i-1, j+1) * 1
-                                    //   + this.img.get(i  , j+1) * 0
+                                      + this.img.get(i-1, j+1) *  1
                                       + this.img.get(i+1, j+1) * -1
 
                         const Y_ = Math.pow(totalSy/8, 2);
@@ -84,20 +78,16 @@
                 return filtered_img;
             };
 
-            const laplace = () => {
+            const laplace = (border) => {
                 let filtered_img = this.img.clone();
 
                 for (let i = 1; i < this.height - 1; i++) {
                     for (let j = 1; j < this.width - 1; j++) {
-                        const total = this.img.get(i-1, j-1) * 0
-                                    + this.img.get(i  , j-1) * -1
-                                    // + this.img.get(i+1, j-1) * 0
+                        const total = this.img.get(i  , j-1) * -1
                                     + this.img.get(i-1, j  ) * -1
-                                    + this.img.get(i  , j  ) * 4
+                                    + this.img.get(i  , j  ) *  4
                                     + this.img.get(i+1, j  ) * -1
-                                    // + this.img.get(i-1, j+1) * 0
                                     + this.img.get(i  , j+1) * -1
-                                    // + this.img.get(i+1, j+1) * 0
 
                         const pixel = total/4;
 
@@ -114,43 +104,46 @@
                 // Top, bottom, left and right
                 // First top and bottom, then left and right
                 let topArray = [];
-                for (let i = 0; i < this.width; i++) {
-                    topArray.push(this.img.get(i, 0));
+                for (let j = 0; j < this.width; j++) {
+                    topArray.push(this.img.get(0, j));
                 }
                 topArray = nj.array(topArray);
 
                 let bottomArray = [];
-                for (let i = 0; i < this.width; i++) {
-                    bottomArray.push(this.img.get(i, this.height-1));
+                for (let j = 0; j < this.width; j++) {
+                    bottomArray.push(this.img.get(this.height-1, j));
                 }
                 bottomArray = nj.array(bottomArray);
 
                 let leftArray = [this.img.get(0,0)];
-                for (let j = 0; j < this.height; j++) {
-                    leftArray.push(this.img.get(0, j));
+                for (let i = 0; i < this.height; i++) {
+                    leftArray.push(this.img.get(i, 0));
                 }
-                leftArray.push(0, this.height-1);
+                leftArray.push(this.img.get(this.height-1, 0));
                 leftArray = nj.array(leftArray);
 
-                let rightArray = [this.img.get(this.width-1,0)];
-                for (let j = 0; j < this.height; j++) {
-                    rightArray.push(this.img.get(this.width-1, j));
+                let rightArray = [this.img.get(0,this.width-1)];
+                for (let i = 0; i < this.height; i++) {
+                    rightArray.push(this.img.get(i, this.width-1));
                 }
-                rightArray.push(this.img.get(this.width-1, this.height-1));
+                rightArray.push(this.img.get(this.height-1, this.width-1));
                 rightArray = nj.array(rightArray);
 
-                let extendedImg = nj.concatenate(topArray, this.img);
-                extendedImg = nj.concatenate(extendImg, bottomArray);
-                extendedImg = nj.concatenate(leftArray.reshape(this.width+2, 1), extendedImg);
-                extendedImg = nj.concatenate(rightArray.reshape(this.width+2, 1), extendedImg);
+                let extendedImg = nj.concatenate(topArray.reshape(1,this.width).T, this.img.T).T;
+                extendedImg = nj.concatenate(extendedImg.T, bottomArray.reshape(this.width, 1)).T;
+                extendedImg = nj.concatenate(leftArray.reshape(this.height+2, 1), extendedImg);
+                extendedImg = nj.concatenate(extendedImg, rightArray.reshape(this.height+2, 1));
 
                 this.width += 2;
                 this.height += 2;
                 this.img = extendedImg;
             };
 
-            if (border === 'extend') {
-                extendImg();
+            const undoExtension = () => {
+                this.img = this.img.slice(1,1);
+                this.img = this.img.slice([null, -1], [null,-1]);
+                this.width -= 2;
+                this.height -= 2;
             }
 
             const kernels = {
@@ -159,7 +152,14 @@
                 "laplace": laplace,
             };
 
-            this.img = kernels[this.kernel]();
+            if (border === 'extend') {
+                extendImg();
+                this.img = kernels[this.kernel]();
+                undoExtension();
+            } else {
+                this.img = kernels[this.kernel]();
+            }
+
         },
 
         apply_xform: function()  {
