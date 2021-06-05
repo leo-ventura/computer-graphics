@@ -23,8 +23,8 @@
                 // Media aritmetica dos pixels cobertos pelo filtro
                 let filtered_img = this.img.clone();
 
-                for (let i = 1; i < this.width - 1; i++) {
-                    for (let j = 1; j < this.height - 1; j++) {
+                for (let i = 1; i < this.height - 1; i++) {
+                    for (let j = 1; j < this.width - 1; j++) {
                         const total = this.img.get(i-1, j-1)
                                     + this.img.get(i  , j-1)
                                     + this.img.get(i+1, j-1)
@@ -49,8 +49,8 @@
                 // [ref]: https://pt.wikipedia.org/wiki/Filtro_Sobel
                 let filtered_img = this.img.clone();
 
-                for (let i = 1; i < this.width - 1; i++) {
-                    for (let j = 1; j < this.height - 1; j++) {
+                for (let i = 1; i < this.height - 1; i++) {
+                    for (let j = 1; j < this.width - 1; j++) {
                         const totalSx = this.img.get(i-1, j-1) * -1
                                       + this.img.get(i  , j-1) * -2
                                       + this.img.get(i+1, j-1) * -1
@@ -87,8 +87,8 @@
             const laplace = () => {
                 let filtered_img = this.img.clone();
 
-                for (let i = 1; i < this.width - 1; i++) {
-                    for (let j = 1; j < this.height - 1; j++) {
+                for (let i = 1; i < this.height - 1; i++) {
+                    for (let j = 1; j < this.width - 1; j++) {
                         const total = this.img.get(i-1, j-1) * 0
                                     + this.img.get(i  , j-1) * -1
                                     // + this.img.get(i+1, j-1) * 0
@@ -198,9 +198,9 @@
             const inversedXForm = matrixInverse(this.xform);
             console.log(inversedXForm);
 
-            let transformedImg = nj.images.read(new Image(this.width, this.height));
-            for (let i = 0; i < this.width; i++) {
-                for (let j = 0; j < this.height; j++) {
+            let transformedImg = this.img.clone();
+            for (let i = 0; i < this.height; i++) {
+                for (let j = 0; j < this.width; j++) {
                     const [u, v] = applyXForm(i, j, inversedXForm);
 
                     // Should we use Math.round or change it to better resampling technique?
