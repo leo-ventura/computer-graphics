@@ -4,8 +4,6 @@
 	(global = global || self, factory(global.ImageProcessing = {}));
 }(this, (function (exports) { 'use strict';
 
-
-
     function ImageProcesser(img, kernel = null, xform = null, bhandler = 'icrop') {
         this.img = img.clone();
         this.width = img.shape[1];
@@ -62,6 +60,7 @@
                                       + this.img.get(i-1, j+1) * 1
                                       + this.img.get(i  , j+1) * 2
                                       + this.img.get(i+1, j+1) * 1
+
                         const X_ = Math.pow(totalSx/8, 2);
 
                         const totalSy = this.img.get(i-1, j-1) * 1
@@ -166,21 +165,38 @@
         apply_xform: function()  {
             // Method to apply affine transform through inverse mapping (incomplete)
             // You may create auxiliary functions/methods if you'd like
-            // [ref]:
-            //  https://github.com/leo-ventura/computer-graphics/blob/0ae22f8f9325e03ca630dfbe01d8577d3211f363/01/src/basic.renderer.js#L51
             const applyXForm = (x, y, xform) => {
-                xform = nj.array(xform);
                 const vertice = nj.array([x, y, 1]);
                 const tVertice = nj.dot(xform, vertice);
                 return [tVertice.get(0), tVertice.get(1)];
             };
 
             const matrixInverse = (xform) => {
-                // TODO finish matrix inverse implementation
-                return xform;
+                let invXform = nj.arange(9).reshape(3,3);
+                const det = xform.get(0,0) * (
+                                xform.get(1,1) * xform.get(2,2) - xform.get(2,1) * xform.get(1,2))
+                          - xform.get(0,1) * (
+                                xform.get(1,0) * xform.get(2,2) - xform.get(1,2) * xform.get(2,0))
+                          + xform.get(0,2) * (
+                                xform.get(1,0) * xform.get(2,1) - xform.get(1,1) * xform.get(2,0));
+
+                const detInv = 1/det;
+
+                invXform.set(0,0, xform.get(1,1) * xform.get(2,2) - xform.get(2,1) * xform.get(1,2));
+                invXform.set(0,1, xform.get(0,2) * xform.get(2,1) - xform.get(0,1) * xform.get(2,2));
+                invXform.set(0,2, xform.get(0,1) * xform.get(1,2) - xform.get(0,2) * xform.get(1,1));
+                invXform.set(1,0, xform.get(1,2) * xform.get(2,0) - xform.get(1,0) * xform.get(2,2));
+                invXform.set(1,1, xform.get(0,0) * xform.get(2,2) - xform.get(0,2) * xform.get(2,0));
+                invXform.set(1,2, xform.get(1,0) * xform.get(0,2) - xform.get(0,0) * xform.get(1,2));
+                invXform.set(2,0, xform.get(1,0) * xform.get(2,1) - xform.get(2,0) * xform.get(1,1));
+                invXform.set(2,1, xform.get(2,0) * xform.get(0,1) - xform.get(0,0) * xform.get(2,1));
+                invXform.set(2,2, xform.get(0,0) * xform.get(1,1) - xform.get(1,0) * xform.get(0,1));
+
+                return invXform.multiply(detInv);
             };
 
             const inversedXForm = matrixInverse(this.xform);
+            console.log(inversedXForm);
 
             let transformedImg = nj.images.read(new Image(this.width, this.height));
             for (let i = 0; i < this.width; i++) {
@@ -189,7 +205,7 @@
 
                     // Should we use Math.round or change it to better resampling technique?
                     const pixel = this.img.get(Math.round(u), Math.round(v));
-                    transformedImg.set(u, v, pixel);
+                    transformedImg.set(i, j, pixel);
                 }
             }
             this.img = transformedImg;
@@ -209,7 +225,7 @@
 
             // Loading HTML elements and saving
             var $transformed = document.getElementById('transformed');
-            $transformed.width = this.width; 
+            $transformed.width = this.width;
             $transformed.height = this.height;
             nj.images.save(this.img, $transformed);
             var duration = new Date().valueOf() - start;
